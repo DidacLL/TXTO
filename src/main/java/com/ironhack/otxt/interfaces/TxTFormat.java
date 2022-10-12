@@ -1,5 +1,5 @@
 package com.ironhack.otxt.interfaces;
 
-public interface TxtFormat {
+public interface TxTFormat {
 
 }

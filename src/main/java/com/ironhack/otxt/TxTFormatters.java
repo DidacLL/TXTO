@@ -1,13 +1,13 @@
 package com.ironhack.otxt;
 
-import com.ironhack.otxt.interfaces.TxtFormat;
+import com.ironhack.otxt.interfaces.TxTFormat;
 
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
-import static com.ironhack.otxt.ColorFactory.TxtStyle.RESET;
+import static com.ironhack.otxt.TxTFormatters.TxTStyle.RESET;
 
-public class ColorFactory {
+public class TxTFormatters {
 
     public static final char DELETE_CURRENT_LINE='\r';
     public static final char NEW_LINE_CH = '\n';
@@ -18,11 +18,11 @@ public class ColorFactory {
 
     public static final int COLOR_LABEL_CHAR_SIZE=6;
     public static final char COLOR_CHAR='\u001B';
-    public enum TxTVAlignment implements TxtFormat{TOP,MIDDLE,BOTTOM}
-    public enum TxTHAlignment implements TxtFormat{LEFT,CENTER,RIGHT}
-    public enum TxTPrintType implements TxtFormat{BLOCK,LINE,TYPER_WRITER,ANIMATE}
+    public enum TxTVAlignment implements TxTFormat {TOP,MIDDLE,BOTTOM}
+    public enum TxTHAlignment implements TxTFormat {LEFT,CENTER,RIGHT}
+    public enum TxTPrintType implements TxTFormat {BLOCK,LINE,TYPER_WRITER,ANIMATE}
 
-    public enum TxtStyle implements TxtFormat {
+    public enum TxTStyle implements TxTFormat {
         NULL_STYLE(""),
         BOLD("[001m"),
         UNDERLINE("[004m"),
@@ -30,7 +30,7 @@ public class ColorFactory {
         REVERSED("[007m"),
         RESET( "[000m");
         final String label;
-        TxtStyle(String label){
+        TxTStyle(String label){
             this.label=label;
         }
 
@@ -40,39 +40,24 @@ public class ColorFactory {
         }
 
     }
-    public enum TxTBackground implements TxtFormat {
-        BLACK( "[040m"),
-
-        RED( "[041m"),
-
-        GREEN( "[042m"),
-
-        YELLOW( "[043m"),
-
-        BLUE( "[044m"),
-
-        PURPLE( "[045m"),
-
-        CYAN( "[046m"),
-
-        WHITE( "[047m"),
-
-        BRIGHT_BLACK( "[100m"),
-
-        BRIGHT_RED( "[101m"),
-
-        BRIGHT_GREEN( "[102m"),
-
-        BRIGHT_YELLOW( "[103m"),
-
-        BRIGHT_BLUE( "[104m"),
-
-        BRIGHT_PURPLE( "[105m"),
-
-        BRIGHT_CYAN( "[106m"),
-
-        BRIGHT_WHITE( "[107m"),
-        NULL_BG("[049m");
+    public enum TxTBackground implements TxTFormat {
+        BG_BLACK( "[040m"),
+        BG_RED( "[041m"),
+        BG_GREEN( "[042m"),
+        BG_YELLOW( "[043m"),
+        BG_BLUE( "[044m"),
+        BG_PURPLE( "[045m"),
+        BG_CYAN( "[046m"),
+        BG_WHITE( "[047m"),
+        BG_BRIGHT_BLACK( "[100m"),
+        BG_BRIGHT_RED( "[101m"),
+        BG_BRIGHT_GREEN( "[102m"),
+        BG_BRIGHT_YELLOW( "[103m"),
+        BG_BRIGHT_BLUE( "[104m"),
+        BG_BRIGHT_PURPLE( "[105m"),
+        BG_BRIGHT_CYAN( "[106m"),
+        BG_BRIGHT_WHITE( "[107m"),
+        BG_NULL("[049m");
         final String label;
         TxTBackground(String label){
             this.label=label;
@@ -80,11 +65,11 @@ public class ColorFactory {
 
         @Override
         public String toString() {
-            return this.equals(NULL_BG)?"":COLOR_CHAR+label;
+            return this.equals(BG_NULL)?"":COLOR_CHAR+label;
         }
 
     }
-    public enum TxtColor implements TxtFormat  {
+    public enum TxTColor implements TxTFormat {
         BLACK( "[030m"),
         BRIGHT_BLACK( "[090m"),
         WHITE( "[037m"),
@@ -105,7 +90,7 @@ public class ColorFactory {
 
 
         final String label;
-            TxtColor(String label){
+            TxTColor(String label){
                 this.label=label;
             }
 
@@ -115,18 +100,18 @@ public class ColorFactory {
         }
     }
 
-    private static TxtColor getRandomColor(){
+    private static TxTColor getRandomColor(){
         int num;
-            num = new java.util.Random().nextInt(4, TxtColor.values().length);
-        return TxtColor.values()[num];
+            num = new java.util.Random().nextInt(4, TxTColor.values().length);
+        return TxTColor.values()[num];
     }
-    private static TxtColor getNextRainbowColor(TxtColor currentColor){
+    private static TxTColor getNextRainbowColor(TxTColor currentColor){
         int num= currentColor.ordinal()+1;
-        if(num>= TxtColor.values().length||num<4)num=4;
-        return TxtColor.values()[num];
+        if(num>= TxTColor.values().length||num<4)num=4;
+        return TxTColor.values()[num];
     }
 
-    private static String changeColors(String text, TxtColor...newColors){
+    private static String changeColors(String text, TxTColor...newColors){
         var charList= text.toCharArray();
         boolean isRandom = true;
         for (int i = 0; i < charList.length; i++) {
@@ -141,11 +126,11 @@ public class ColorFactory {
         return new String(charList);
 
     }
-    public static String formatText(String text,TxtFormat... txtFormats){
-        return Arrays.stream(txtFormats).map(String::valueOf).collect(Collectors.joining())+text+RESET;
+    public static String formatText(String text, TxTFormat... txTFormats){
+        return Arrays.stream(txTFormats).map(String::valueOf).collect(Collectors.joining())+text+RESET;
     }
     public static String rainbowCharacters(String line,int startVal){
-        var color= TxtColor.values()[startVal];
+        var color= TxTColor.values()[startVal];
         var charList=line.toCharArray();
         var sb= new StringBuilder();
         for (int i = 0; i < charList.length; i++) {

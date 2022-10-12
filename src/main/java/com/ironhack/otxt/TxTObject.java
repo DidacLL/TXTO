@@ -1,15 +1,14 @@
 package com.ironhack.otxt;
 
 
-import com.ironhack.otxt.ColorFactory.*;
 import com.ironhack.otxt.exceptions.TxTEmptyObjectException;
-import com.ironhack.otxt.interfaces.TxtFormat;
+import com.ironhack.otxt.interfaces.TxTFormat;
 
 import java.util.ArrayList;
 
-import static com.ironhack.otxt.ColorFactory.*;
-import static com.ironhack.otxt.ColorFactory.TxTPrintType.BLOCK;
-import static com.ironhack.otxt.ColorFactory.TxtStyle.RESET;
+import static com.ironhack.otxt.TxTFormatters.*;
+import static com.ironhack.otxt.TxTFormatters.TxTPrintType.BLOCK;
+import static com.ironhack.otxt.TxTFormatters.TxTStyle.RESET;
 import static com.ironhack.otxt.TxTUtils.*;
 
 /**
@@ -26,8 +25,8 @@ import static com.ironhack.otxt.TxTUtils.*;
 public class TxTObject {
 
     private final TxTBackground bgColor;
-    private final TxtColor txtColor;
-    private final TxtStyle txtStyle;
+    private final TxTColor txtColor;
+    private final TxTStyle txtStyle;
     private final TxTVAlignment verticalAlignment;
     private final TxTHAlignment horizontalAlignment;
 
@@ -35,25 +34,29 @@ public class TxTObject {
     private final int MAX_WIDTH;
     private final int MAX_HEIGHT;
     private int totalWidth, totalHeight;
-
-
     private boolean overload;
     private final TxTPrintType printType;
 
-    public TxTObject(int max_width, int max_height, TxtFormat... formats) {
+    /**Main TxtObject Constructor
+     * @param max_width Max Width in Characters
+     * @param max_height Max Height in Characters
+     *                   (this value could be modified to text height by changing overload to true)
+     * @param formats Optional TxTFormat values to set TxTObject configuration. Formats can only be set here.
+     */
+    public TxTObject(int max_width, int max_height, TxTFormat... formats) {
         MAX_WIDTH = max_width;
         MAX_HEIGHT = max_height;
         text = new ArrayList<>();
-        var style = TxtStyle.NULL_STYLE;
-        var color = TxtColor.NULL_COLOR;
-        var background = TxTBackground.NULL_BG;
+        var style = TxTStyle.NULL_STYLE;
+        var color = TxTColor.NULL_COLOR;
+        var background = TxTBackground.BG_NULL;
         var vAlign = TxTVAlignment.MIDDLE;
         var hAlign = TxTHAlignment.CENTER;
         var print = BLOCK;
         for (var format : formats) {
-            if (format instanceof TxtColor fColor) color = fColor;
+            if (format instanceof TxTColor fColor) color = fColor;
             else if (format instanceof TxTBackground fBackground) background = fBackground;
-            else if (format instanceof TxtStyle fStyle) style = fStyle;
+            else if (format instanceof TxTStyle fStyle) style = fStyle;
             else if (format instanceof TxTVAlignment alignment) vAlign = alignment;
             else if (format instanceof TxTHAlignment alignment) hAlign = alignment;
             else if (format instanceof TxTPrintType fPrint) print = fPrint;
@@ -71,8 +74,9 @@ public class TxTObject {
         return overload;
     }
 
-    public void setOverload(boolean overload) {
+    public TxTObject setOverload(boolean overload) {
         this.overload = overload;
+        return this;
     }
     public int getTotalHeight() {
         updateTotalHeight();
@@ -260,7 +264,7 @@ public class TxTObject {
     }
 
     /**
-     * Method that creates a new TxTObject with the current content of this one but with a diferent sizes
+     * Method that creates a new TxTObject with the current content of this one but with a different sizes
      *
      * @param newWidth  new desired width in characters
      * @param newHeight new desired height in lines
@@ -272,6 +276,29 @@ public class TxTObject {
             txtObj.addText(this.text.get(i));
         }
         return txtObj;
+    }
+    /**
+     * Method that creates a new TxTObject with the current content of this one but with a different format values
+     *
+     * @param formats  new desired formats
+     * @return new TxTObject
+     */
+    public TxTObject getReformattedTxTObject(TxTFormat... formats) {
+        var style = this.txtStyle;
+        var color = this.txtColor;
+        var background = this.bgColor;
+        var vAlign = this.verticalAlignment;
+        var hAlign = this.horizontalAlignment;
+        var print = this.printType;
+        for (var format : formats) {
+            if (format instanceof TxTColor fColor) color = fColor;
+            else if (format instanceof TxTBackground fBackground) background = fBackground;
+            else if (format instanceof TxTStyle fStyle) style = fStyle;
+            else if (format instanceof TxTVAlignment alignment) vAlign = alignment;
+            else if (format instanceof TxTHAlignment alignment) hAlign = alignment;
+            else if (format instanceof TxTPrintType fPrint) print = fPrint;
+        }
+        return new TxTObject(this.MAX_WIDTH,this.MAX_HEIGHT,color,background,style,vAlign,hAlign,print).setOverload(this.isOverload());
     }
     public String[] getRawText(){
         return text.toArray(new String[0]);
@@ -360,9 +387,9 @@ public class TxTObject {
     }
 
     private String getTextColorsModifiers() {
-        return (txtStyle.toString())
+        return (txtStyle)
                 + (bgColor.toString())
-                + (txtColor.toString());
+                + (txtColor);
     }
 
 
@@ -425,9 +452,10 @@ public class TxTObject {
                     sb.append(poll()).append(hasText() ? NEW_LINE : "");
                 }else{
                     String str= poll();
-                    int val= str.length() - (COLOR_LABEL_CHAR_SIZE + 3);
+
+                    int val= str.length() - (COLOR_LABEL_CHAR_SIZE + Math.min(3,MAX_WIDTH));
                     String substring = str.substring(0, val);
-                    sb.append(substring + "..." + RESET);
+                    sb.append(substring).append(".".repeat(Math.min(3, MAX_WIDTH))).append(RESET);
 
                 }
                 limit--;
